@@ -2,14 +2,17 @@ package com.self.portfolio.service;
 
 import com.self.portfolio.model.UserDetail;
 import com.self.portfolio.repository.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
 
-    UserRepository userRepository;
+    private final UserRepository userRepository;
     UserService(UserRepository userRepository){
         this.userRepository = userRepository;
     }
@@ -22,7 +25,12 @@ public class UserService {
         return userRepository.save(userDetail);
     }
 
-    public void deleteUsers(UserDetail userDetail) {
-        userRepository.delete(userDetail);
+    public ResponseEntity<?> deleteUsers(UserDetail userDetail) {
+        if(Optional.ofNullable(userDetail.getId()).isPresent() && userRepository.findById(userDetail.getId()).isPresent()) {
+            userRepository.delete(userDetail);
+            return ResponseEntity.ok("User deleted!");
+        }else {
+            return new ResponseEntity<>("User not found",HttpStatus.BAD_REQUEST);
+        }
     }
 }
